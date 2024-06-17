@@ -1,0 +1,421 @@
+django
+-----------
+
+
+python3.11 -m pip install virtualenv
+python3.11 -m virtualenv venv 
+venv\Scripts\activate.ps1 ---> to activae
+deactivate --> to deactivate 
+pip install django
+django-admin help
+
+django-admin startproject <project_name>
+modify the top <project_name> to src
+
+
+python manage.py runserver
+copy the http url and paste it over google
+
+we have 18 unapplied migrations
+----------------------------------
+migrations--> the python code that we write interact withe the database --> kind fo schemas
+
+python manage.py migrate
+
+
+
+
+
+
+under automax folder we have few essential files which makes our app to work like:
+__init__.py --> basic python iniatializer to mark something as package
+asgi.py  --> asynchronous server gateway interface  --> used to allow external applications to ineract with our django application
+settings.py --> contains major setings for our djano app like secretkey,ALLOWED_HOSTS,INSTALLED_APPS,MIDDLEWARE,ROOT_URLCONF,TEMPLATES,WSGI_APPLICATION,DATABASES,AUTH_PASSWORD_VALIDAT, etc...
+urls.py --> defines all the urls and paths that accessable
+wsgi.py ---> used when we deploy our aplication to production. it serves as entry point for webservers to interact with our django app
+
+we can create user in django admin panal
+--------------------------------------------
+
+python manage.py createsuperuser
+<enter username and set password>
+
+logic for creating mainpage(homepage)
+------------------------------------
+python manage.py startapp <app_name>
+after that we need to modify the settings.py in <project_name> and add <app_name> additinally in INSTALLED_APPS array.
+now a new app gets created with migration folder and few essential files which makes our app to work like:
+migration
+__init__.py ---> maps the folder as package
+admin.py --> adds functionallity for our application
+apps.py --> stores the info of secific file that we created <app_name>
+models.py --> we can stire differenr types of models requires to our application. It allows us to define classes nd each class is resposinble for creating a table in db
+tests.py --> used for placing a unit testing for our application
+views.py --> functionallity were we can see whats going on i.e., hadelling of requests from user whiie accessing of this application. it is an endpoint of our application
+	     views.py is responsible for showing main page 
+
+now we had linked the <app_name> with <project_name> successfully by edditing the settings.py
+
+creating a homepage using views.py(working with django views)
+-------------------------------------
+in views.py add the following code
+
+from django.http import HttpResponse
+from django.shortcuts import render
+
+# Create your views here.
+def main_view(request):
+    return HttpResponse("<h1>Welcom to Automax </h1>")
+
+
+after defining main_view function create a new urls.py in <app_name>
+
+add the code in urls.py mentioned below
+------------------------------------------
+from django.urls import path
+from .views import main_view
+
+urlpatterns = [
+    path('',main_view,name='main')
+]
+
+
+after adding the code we need to link this urls.py with <project_name> urls.py then only it will work
+in base urls.py modify the code mentoned below
+
+
+from django.contrib import admin
+from django.urls import path, include
+
+from main import urls as main_urls_path
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',include(main_urls_path))
+]
+
+then our homepage works well and good with title name
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+working with django templating
+----------------------
+create a new folder templates in main
+after creating templates folder create a new folder views in templates 
+in that template add main.html file
+
+add the folllowing code
+<h1> welcome to {{ name }}! :) </h1>
+
+also modify the views.py as mentioned bellow
+#using template file as request
+def main_view(request):
+    return render(request, "views/main.htm" , {'name' : 'autoMAX'})
+
+------------------------------------------------------------------------------------
+extending main.html(edit the html file its upto u)
+---------------------
+<html lang='en' class='h-100'>
+<head>
+    <h1> hello </h1>
+</head>
+<body>
+    <h1> welcome to {{ name }}! :) </h1>
+</body>
+
+</html>
+-------------------------------------------------------
+after creating basic html we need to style the formate for that open the github repo
+https://github.com/preneure/automax_django_web_app
+
+copy the static folder which is present in src-main-static and paste it <folderhead>-->src-->main->(static) make sure u have css,images,js and videos
+make sure u have bootstrap.min.css in css folder
+after that modify the html file  mentioned below
+
+{% load static %}
+
+<html lang='en' class='h-100'>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewpoint" content="width=device-width,initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="madhan">
+
+    <!--bootstrap core css-->
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+</head>
+<body>
+    <h1> welcome to {{ name }} :) </h1>
+</body>
+
+
+<footer class="footer text-muted bg-dark py-5">
+    <div class="container">
+        <p class="float-end mb-1">powered by <a href="https:/www.djangoproject.com/">Django</a></p>
+        </p>
+        <p class"mb-1"> AutomaX - Best place to buy and sell cars</p>
+    </div>
+</footer>
+
+</html>
+
+
+
+
+then u will see the basic bootstrap style formate 
+-------------------------------------------------------------------------------
+
+now under the template create a new folder base and create base.html(its the base html file used if neccessary)
+now cut the head and footer tag in main.html file into base.html and create a body block xtra
+
+{% load static %}
+<!DOCTYPE html>
+<html lang='en' class='h-100'>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewpoint" content="width=device-width,initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="madhan">
+
+    <!--bootstrap core css-->
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--bootstrap custome stlyle css-->
+    <link href="{% static "css/style.css" %}" rel="stylesheet">
+</head>
+
+<body>
+    {% block 'body'%}
+    {% endblock %}
+</body>
+
+
+<footer class="footer text-muted bg-dark py-5">
+    <div class="container">
+        <p class="float-end mb-1">powered by <a href="https:/www.djangoproject.com/">Django</a></p>
+        </p>
+        <p class"mb-1"> AutomaX - Best place to buy and sell cars</p>
+    </div>
+</footer>
+
+
+</html>
+
+now the main.html file should look like below
+-----------------------------------
+{% extends "base/base.html" %}
+{% block 'body'%}
+    <h1> welcome to {{ name }} :) </h1>
+{% endblock %}
+
+--------------------------------------------------------------------------------------------
+after that made slight chagnes for both main.html and base.html (we need to use href as style.css)
+base.html
+----------
+{% load static %}
+<!DOCTYPE html>
+<html lang='en' class='h-100'>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewpoint" content="width=device-width,initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="madhan">
+
+    <!--bootstrap core css-->
+    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!--bootstrap custome stlyle css-->
+    <link href="{% static "css/style.css" %}" rel="stylesheet">
+</head>
+
+<body>
+    {% block 'body'%}
+    {% endblock %}
+</body>
+
+{% block 'footer' %}
+<footer class="footer text-muted bg-dark py-5">
+    <div class="container">
+        <p class="float-end mb-1">powered by <a href="https:/www.djangoproject.com/">Django</a></p>
+        </p>
+        <p class"mb-1"> AutomaX - Best place to buy and sell cars</p>
+	<p class="mb-0">© Copyright {% now 'Y' %} <a href="">AutoMax</a></p>
+    </div>
+</footer>
+{% endblock %}
+
+</html>
+
+
+main.html
+----------{% extends "base/base.html" %}
+{% block 'body'%}
+    <h1> welcome to {{ name }} :) </h1>
+{% endblock %}
+
+
+
+{% block 'footer' %}
+<footer class="mt-auto text-white-50">
+    <p>Copyright © {% now 'Y' %} <a href="" class="text-white">AutoMax</a> by <a href="https://preneure.com"
+            class="text-white">Preneure.com</a></p>
+</footer>
+{% endblock %}
+
+
+now the footer is gets modified
+----------------------------------------------
+
+finishinh the home page
+-------------------------
+inorder to see the home page looks good with register,login,home and footer modify the code in main.html as below
+{% extends "base/base.html" %}
+{% load static %}
+{% block 'body'%}
+<div class="d-flex h-100 text-center text-white index">
+    <video autoplay muted loop id="myVideo">
+        <source src="{% static 'videos/bg.mp4' %}" type="video/mp4">
+        <!-- Credit: https://www.pexels.com/@kelly-l-1179532 (Pexels.com)-->
+    </video>
+    <div class="d-flex w-100 h-100 p-3 mx-auto flex-column main-content">
+        <header class="mb-auto">
+            <div>
+                <h3 class="float-md-start mb-0">AutoMax</h3>
+                <nav class="nav nav-masthead justify-content-center float-md-end">
+                    <a class="nav-link active" aria-current="page" href="">Home</a>
+                    <a class="nav-link" href="">Login</a>
+                </nav>
+            </div>
+        </header>
+        <main class="px-3">
+            <h2>Find a deal near you!</h2>
+            <p class="lead">Looking to buy or sell a used car? We've got you
+                covered. </br> AutoMax is the leading used car marketplace.</p>
+            <p class="lead">
+                <a href="" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Register</a>
+            </p>
+        </main>
+        <footer class="mt-auto text-white-50">
+            <p>Copyright © {% now 'Y' %} <a href="" class="text-white">AutoMax</a> by <a href="https://preneure.com"
+                    class="text-white">Preneure.com</a></p>
+        </footer>
+    </div>
+</div>
+{% endblock %}
+
+{% block 'footer' %}
+{% endblock %}
+
+---------------------------------------------------------------------------
+authentication
+-------------
+
+create a new app named users and add the functionllity in settings.py in automax
+crete a new user using admin panel
+after creating uses
+
+create a new model in models.py folder in user folder and add the below model
+
+from django.db import models
+from django.contrib.auth.models import User
+# Create your models here.
+class profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(null=True)
+    bio = models.CharField(max_length=140,blank=True)
+    phone_number = models.CharField(max_length=12,blank=True)
+
+    def __str__(self):
+        return f'{self.user.username}\'s Profile'
+
+
+after adding make migratios
+python manage.py makemigrations make sure pillow module is installed
+
+
+python -m pip install Pillow
+
+after making migrations u need to migrate the manage.py use the below command
+python manage.py migrate
+so now we created profile successfully
+----------------------------------------------------------------------
+after creating model we need to register to admin panel
+so open admin.py in users folder add the below code
+
+from django.contrib import admin
+from .models import profile
+# Register your models here.
+
+class profileadmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(profile, profileadmin)
+
+
+so finaly now u can add new profiles in our site
+---------------------------------------------------------
+
+instead of creating user and profile individually we can automate at single time for that create a new signals.py file in uses and add following code
+
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from .models import profile
+
+@receiver(post_save,sender=User)
+def create_user_profile(sender,instance,created,**kwargs):
+    if created:
+        profile.objects.create(user=instance)
+
+in that same users folder u will see __init__.py add the below line in it
+default_app_config='user.apps.UsersConfig'
+
+as well as modify the apps.py as mentioned below
+-----
+from django.apps import AppConfig
+
+
+class UsersConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'users'
+
+    def ready(self):
+        import users.signals
+
+-----------------------------------------------------------------------------------------------------------------
+adding location to the user u created
+
+pip install django-localflavor
+ 
+now edit the settings.py in <project_name> add --> 'localflavor' in installed_apps before the 'main'
+
+now add new model location in the users folder sim'lly as profile as mention below
+
+class Location(models.Model):
+    address_1 = models.CharField(max_length=128)
+    address_2 = models.CharField(max_length=128,blank=True)
+    city = models.CharField(max_length=64)
+
+
+after adding do migrations bcz new app is added in settings.py right
+
+python manage.py makemigrations
+python manage.py migrate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
